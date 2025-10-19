@@ -91,21 +91,11 @@ def marketplace():
 @app.route('/browse')
 def browse_vehicles():
     """Customer-facing catalog page with filtered vehicles"""
-    category = request.args.get('category')
+    category = request.args.get('category', 'all')
     search = request.args.get('search', '')
     
-    # Redirect to marketplace if no category is selected or if accessing directly
-    if not category:
-        return redirect(url_for('marketplace'))
-    
-    # Check if user visited marketplace first (session-based check)
-    # Allow if they have marketplace session or coming from browse/marketplace
-    referrer = request.referrer or ''
-    has_marketplace_session = session.get('visited_marketplace')
-    from_valid_page = any(x in referrer for x in ['/marketplace', '/browse'])
-    
-    if not has_marketplace_session and not from_valid_page:
-        return redirect(url_for('marketplace'))
+    # Set visited marketplace session for smooth navigation
+    session['visited_marketplace'] = True
 
     # Get available vehicles based on category
     if category == 'all':
