@@ -1,11 +1,17 @@
 import os
 import uuid
-from flask import render_template, request, redirect, url_for, flash, session, jsonify, render_template_string
+from flask import render_template, request, redirect, url_for, flash, session, jsonify, render_template_string, g
 from werkzeug.utils import secure_filename
 
 from app import app, db
 from models import Vehicle, AdminUser, add_vehicle, get_all_vehicles, get_vehicle, delete_vehicle, verify_admin, get_available_vehicles, get_vehicles_by_category, initialize_sample_data
 from forms import VehicleForm, LoginForm, ImageManagementForm
+
+@app.before_request
+def mark_admin_pages():
+    """Mark admin pages in request context - only dashboard pages, not login"""
+    admin_paths = ['/admin']
+    g.is_admin_page = any(request.path.startswith(path) for path in admin_paths)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
@@ -61,8 +67,8 @@ def save_uploaded_files(files):
 
 @app.route('/')
 def index():
-    """Landing page redirects to admin login"""
-    return redirect(url_for('admin_login'))
+    """Landing page redirects to marketplace for customers"""
+    return redirect(url_for('marketplace'))
 
 @app.route('/marketplace')
 def marketplace():

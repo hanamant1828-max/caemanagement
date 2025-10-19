@@ -29,7 +29,7 @@
                 </ul>
                 
                 <ul class="navbar-nav">
-                    {% if session.admin_logged_in %}
+                    {% if session.admin_logged_in and g.is_admin_page %}
                         <li class="nav-item">
                             <a class="btn btn-success me-2" href="{{ url_for('admin_dashboard') }}">
                                 <i class="fas fa-cog me-1"></i>Admin Panel
