@@ -3,106 +3,135 @@
 {% block title %}Browse {{ current_category }} - Friendscars{% endblock %}
 
 {% block content %}
-<!-- Compact Search Bar -->
-<div class="bg-light border-bottom py-2 mb-3">
+<!-- Hero Section with Search -->
+<div class="hero-section bg-gradient-primary text-white mb-4">
     <div class="container">
-        <form method="GET" class="row g-2 align-items-center">
-            <div class="col-lg-5 col-md-6">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" name="search" 
-                           value="{{ search }}" placeholder="Search vehicles...">
+        <div class="row align-items-center py-4">
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold mb-3">Find Your Perfect Car</h1>
+                <p class="lead mb-4">Browse quality pre-owned vehicles. Find your next car at the best prices.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="search-box bg-white p-4 rounded-3 shadow">
+                    <form method="GET">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control form-control-lg" name="search" 
+                                           value="{{ search }}" placeholder="Search cars, brands, models...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" name="category" onchange="this.form.submit()">
+                                    <option value="all" {{ 'selected' if current_category == 'all' else '' }}>All Categories</option>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat }}" {{ 'selected' if current_category == cat else '' }}>{{ cat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <select class="form-select form-select-sm" name="category" onchange="this.form.submit()">
-                    <option value="all" {{ 'selected' if current_category == 'all' else '' }}>All Categories</option>
-                    {% for cat in categories %}
-                        <option value="{{ cat }}" {{ 'selected' if current_category == cat else '' }}>{{ cat }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-lg-2 col-md-3 col-6">
-                <button type="submit" class="btn btn-primary btn-sm w-100">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
-            <div class="col-lg-2 col-12">
-                <div class="d-flex gap-2 justify-content-end">
-                    {% if search %}
-                        <a href="{{ url_for('browse_vehicles', category=current_category) }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-times"></i> Clear
-                        </a>
-                    {% endif %}
-                    <span class="badge bg-primary align-self-center">{{ vehicles|length }} cars</span>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<!-- Vehicle Listings - OLX Style -->
-<div class="container-fluid px-lg-4">
+<!-- Filter and Results Bar -->
+<div class="container mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4 class="mb-0">
+                {% if search %}
+                    Results for "{{ search }}"
+                {% elif current_category != 'all' %}
+                    {{ current_category }}
+                {% else %}
+                    All Vehicles
+                {% endif %}
+                <span class="badge bg-primary ms-2">{{ vehicles|length }} vehicles</span>
+            </h4>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if search or current_category != 'all' %}
+                <a href="{{ url_for('browse_vehicles') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Vehicle Listings -->
+<div class="container mb-5">
     {% if vehicles %}
-        <div class="row g-2 g-md-3">
+        <div class="row g-4">
             {% for vehicle in vehicles %}
-                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6">
-                    <div class="card h-100 shadow-sm border-0 listing-card-compact">
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 shadow-sm border-0 listing-card">
                         <div class="position-relative">
                             <!-- Vehicle Image -->
                             {% if vehicle.images_list and vehicle.images_list|length > 0 %}
                                 <img src="{{ url_for('static', filename='uploads/' + vehicle.images_list[0]) }}" 
                                      class="card-img-top" 
-                                     style="height: 150px; object-fit: cover;"
+                                     style="height: 200px; object-fit: cover;"
                                      alt="{{ vehicle.title }}"
                                      onerror="this.src='{{ url_for('static', filename='placeholder.jpg') }}'; this.onerror=null;">
                             {% else %}
-                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
-                                    <i class="fas fa-car fa-2x text-muted"></i>
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-car fa-3x text-muted"></i>
                                 </div>
                             {% endif %}
-                            
+
                             <!-- Category Badge -->
-                            <span class="badge bg-primary position-absolute top-0 start-0 m-2" style="font-size: 0.7rem;">
+                            <span class="badge bg-primary position-absolute top-0 start-0 m-2">
                                 {{ vehicle.category }}
                             </span>
-                            
+
                             <!-- Image Count -->
                             {% if vehicle.images_list|length > 1 %}
-                                <span class="badge bg-dark position-absolute top-0 end-0 m-2" style="font-size: 0.65rem;">
+                                <span class="badge bg-dark position-absolute top-0 end-0 m-2">
                                     <i class="fas fa-camera"></i> {{ vehicle.images_list|length }}
                                 </span>
                             {% endif %}
-
-                            <!-- Favorite Button -->
-                            <button type="button" class="btn btn-light btn-sm position-absolute bottom-0 end-0 m-2 rounded-circle p-0" 
-                                    style="width: 28px; height: 28px;"
-                                    onclick="toggleFavorite('{{ vehicle.id }}')" title="Favorite">
-                                <i class="far fa-heart" style="font-size: 0.85rem;"></i>
-                            </button>
                         </div>
 
-                        <div class="card-body p-2">
+                        <div class="card-body">
                             <!-- Price -->
-                            <h5 class="text-success mb-1" style="font-size: 1.1rem; font-weight: 700;">
+                            <h4 class="text-success mb-2 fw-bold">
                                 ₹{{ "{:,.0f}".format(vehicle.price) }}
-                            </h5>
-                            
+                            </h4>
+
                             <!-- Title -->
-                            <h6 class="mb-1" style="font-size: 0.875rem; font-weight: 600; line-height: 1.2;">
-                                {{ vehicle.title[:40] }}{{ '...' if vehicle.title|length > 40 else '' }}
-                            </h6>
-                            
+                            <h5 class="card-title mb-2">
+                                {{ vehicle.title }}
+                            </h5>
+
                             <!-- Details -->
-                            <p class="text-muted mb-2" style="font-size: 0.75rem;">
-                                {{ vehicle.year }} • {{ "{:,}".format(vehicle.mileage) }} mi
+                            <p class="text-muted mb-3">
+                                <i class="fas fa-calendar me-1"></i>{{ vehicle.year }} • 
+                                <i class="fas fa-tachometer-alt me-1"></i>{{ "{:,}".format(vehicle.mileage) }} miles
+                            </p>
+
+                            <!-- Description Preview -->
+                            <p class="card-text text-muted small mb-3">
+                                {{ vehicle.description[:80] }}{{ '...' if vehicle.description|length > 80 else '' }}
                             </p>
 
                             <!-- Actions -->
-                            <div class="d-grid gap-1">
+                            <div class="d-grid gap-2">
                                 <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" 
-                                   class="btn btn-outline-primary btn-sm py-1" style="font-size: 0.8rem;">
-                                    <i class="fas fa-eye"></i> View Details
+                                   class="btn btn-primary">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a>
+                                <a href="tel:{{ vehicle.contact_phone }}" class="btn btn-outline-success">
+                                    <i class="fas fa-phone me-2"></i>Call Seller
                                 </a>
                             </div>
                         </div>
@@ -110,18 +139,11 @@
                 </div>
             {% endfor %}
         </div>
-
-        <!-- Pagination Placeholder -->
-        <div class="text-center my-4">
-            <button class="btn btn-outline-primary" onclick="showMoreVehicles()" style="display: none;">
-                <i class="fas fa-plus me-2"></i>Load More
-            </button>
-        </div>
     {% else %}
         <!-- Empty State -->
         <div class="text-center py-5">
-            <i class="fas fa-car fa-4x text-muted mb-3"></i>
-            <h4 class="text-muted mb-3">No vehicles found</h4>
+            <i class="fas fa-car fa-4x text-muted mb-4"></i>
+            <h3 class="text-muted mb-3">No vehicles found</h3>
             <p class="text-muted mb-4">
                 {% if search %}
                     We couldn't find any vehicles matching "{{ search }}".
@@ -129,71 +151,38 @@
                     No vehicles available in this category.
                 {% endif %}
             </p>
-            <a href="{{ url_for('marketplace') }}" class="btn btn-primary">
+            <a href="{{ url_for('marketplace') }}" class="btn btn-primary btn-lg">
                 <i class="fas fa-list me-2"></i>Browse All Categories
             </a>
         </div>
     {% endif %}
 </div>
 
-<!-- Floating Filter Button (Mobile) -->
-<button class="btn btn-primary rounded-circle shadow-lg position-fixed d-md-none" 
-        style="bottom: 20px; right: 20px; width: 56px; height: 56px; z-index: 1000;"
-        data-bs-toggle="modal" data-bs-target="#filterModal">
-    <i class="fas fa-filter"></i>
-</button>
-
-<!-- Mobile Filter Modal -->
-<div class="modal fade" id="filterModal" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen-sm-down">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Filter & Search</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="GET">
-                    <div class="mb-3">
-                        <label class="form-label">Search</label>
-                        <input type="text" class="form-control" name="search" value="{{ search }}" 
-                               placeholder="Search vehicles...">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Category</label>
-                        <select class="form-select" name="category">
-                            <option value="all" {{ 'selected' if current_category == 'all' else '' }}>All Categories</option>
-                            {% for cat in categories %}
-                                <option value="{{ cat }}" {{ 'selected' if current_category == cat else '' }}>{{ cat }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100" data-bs-dismiss="modal">
-                        Apply Filters
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-.listing-card-compact {
-    transition: transform 0.2s, box-shadow 0.2s;
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.search-box {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.listing-card {
+    transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
 }
 
-.listing-card-compact:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+.listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
 }
 
-.listing-card-compact .card-img-top {
+.listing-card .card-img-top {
     border-radius: 0.25rem 0.25rem 0 0;
 }
 
-.listing-card-compact .btn-outline-primary:hover {
-    background-color: #0d6efd;
-    color: white;
+.listing-card .btn-primary:hover {
+    transform: scale(1.02);
 }
 </style>
 
@@ -201,7 +190,7 @@
 function toggleFavorite(vehicleId) {
     const btn = event.target.closest('button');
     const icon = btn.querySelector('i');
-    
+
     if (icon.classList.contains('far')) {
         icon.classList.remove('far');
         icon.classList.add('fas');
@@ -211,27 +200,6 @@ function toggleFavorite(vehicleId) {
         icon.classList.add('far');
         icon.style.color = '';
     }
-}
-
-function shareVehicle(vehicleId, title, price) {
-    const url = window.location.origin + '/vehicle/' + vehicleId;
-    const text = title + ' - ₹' + parseFloat(price).toLocaleString('en-IN');
-    
-    if (navigator.share) {
-        navigator.share({
-            title: title,
-            text: text,
-            url: url
-        }).catch(err => console.log('Share cancelled'));
-    } else {
-        navigator.clipboard.writeText(url).then(() => {
-            alert('Link copied to clipboard!');
-        });
-    }
-}
-
-function showMoreVehicles() {
-    console.log('Load more vehicles...');
 }
 </script>
 {% endblock %}
