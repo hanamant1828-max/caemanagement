@@ -6,6 +6,10 @@ A Flask-based automotive marketplace web application similar to OLX, designed fo
 
 ## Recent Changes
 
+**OLX-Style Browse Page (October 19, 2025)**: Complete redesign of vehicle browse page with compact OLX-inspired layout. Changed from 4 cards per row to 6 cards per row (col-xl-2 grid), removed large hero section and replaced with slim search bar, reduced card padding and image heights, simplified card content to show only essential information (price, title, year, mileage). Browse page now displays significantly more vehicles without scrolling, matching OLX's dense listing style. Simplified routing to allow direct access to browse page without forced marketplace visit.
+
+**Customer/Admin Separation (October 19, 2025)**: Implemented complete separation between customer and admin interfaces for enhanced security. Removed all admin links from customer-facing pages (navigation bar now shows no admin references). Customer pages remain completely clean and professional. Admin controls only visible when logged in and on admin pages. Landing page redirects to marketplace for immediate customer browsing.
+
 **Step-by-Step Wizard Complete (August 11, 2025)**: Successfully implemented a comprehensive 6-step vehicle entry wizard with proper form validation, error handling, and notification system. Fixed all save button functionality and authentication issues for smooth vehicle creation workflow.
 
 **Admin Access Security (August 14, 2025)**: Removed admin login button from customer interface to prevent accidental access. Created admin URLs: `/secret-admin-access-2025` and `/staff` with public access to login form but protected dashboard access. Customers see clean marketplace without admin login visibility while administrators can access login form via direct URLs and authenticate to reach dashboard.
