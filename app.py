@@ -37,14 +37,20 @@ if database_url:
         "pool_pre_ping": True,
     }
 else:
-    # Use SQLITE_PATH environment variable or default to data/app.db
-    sqlite_path = os.getenv("SQLITE_PATH", "data/app.db")
+    # Use SQLITE_PATH environment variable or default to instance/app.db
+    sqlite_path = os.getenv("SQLITE_PATH", "instance/app.db")
     
-    # Ensure the directory for the SQLite database exists
-    db_dir = os.path.dirname(sqlite_path)
-    if db_dir and not os.path.exists(db_dir):
-        os.makedirs(db_dir, exist_ok=True)
-        logging.info(f"Created database directory: {db_dir}")
+    # Only create directory if it's a relative path (safer for deployment platforms)
+    if not os.path.isabs(sqlite_path):
+        db_dir = os.path.dirname(sqlite_path)
+        if db_dir:
+            try:
+                os.makedirs(db_dir, exist_ok=True)
+                logging.info(f"Created database directory: {db_dir}")
+            except (PermissionError, OSError) as e:
+                logging.warning(f"Could not create database directory {db_dir}: {e}")
+                # Fall back to current directory
+                sqlite_path = "app.db"
     
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{sqlite_path}"
 
@@ -54,8 +60,11 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# Ensure upload directory exists (with error handling for deployment platforms)
+try:
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+except (PermissionError, OSError) as e:
+    logging.warning(f"Could not create upload directory: {e}")
 
 # initialize the app with the extension, flask-sqlalchemy >= 3.0.x
 db.init_app(app)

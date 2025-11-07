@@ -54,9 +54,10 @@ In the Render dashboard for your web service, go to the "Environment" tab and ad
   ```
 
 ### Optional Variables:
-- **SQLITE_PATH**: Path for SQLite database (default: `data/app.db`)
+- **SQLITE_PATH**: Path for SQLite database (default: `instance/app.db`)
   ```
-  Example: data/app.db
+  Example: instance/app.db
+  Note: Use relative paths only. Absolute paths may cause permission errors.
   ```
 
 - **PORT**: The port your app will run on (Render sets this automatically, usually 10000)
