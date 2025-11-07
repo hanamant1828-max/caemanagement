@@ -17,7 +17,9 @@ db = SQLAlchemy(model_class=Base)
 
 # create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "replit-automarket-secret-key-2025")
+
+# Use environment variables for configuration
+app.secret_key = os.getenv("SECRET_KEY", "replit-automarket-secret-key-2025")
 app.config['WTF_CSRF_ENABLED'] = False
 
 # Initialize CSRF protection  
@@ -25,8 +27,9 @@ app.config['WTF_CSRF_ENABLED'] = False
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1) # needed for url_for to generate with https
 
-# configure the database, relative to the app instance folder
-database_url = os.environ.get("DATABASE_URL")
+# Configure the database using environment variables
+# Priority: DATABASE_URL (for PostgreSQL/production) > SQLITE_PATH > default
+database_url = os.getenv("DATABASE_URL")
 if database_url:
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -34,7 +37,16 @@ if database_url:
         "pool_pre_ping": True,
     }
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///automarket.db"
+    # Use SQLITE_PATH environment variable or default to data/app.db
+    sqlite_path = os.getenv("SQLITE_PATH", "data/app.db")
+    
+    # Ensure the directory for the SQLite database exists
+    db_dir = os.path.dirname(sqlite_path)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+        logging.info(f"Created database directory: {db_dir}")
+    
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{sqlite_path}"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
