@@ -234,16 +234,94 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .category-icon {
-        font-size: 2.5rem;
+    .min-vh-50 {
+        min-height: 30vh;
     }
     
     .category-selection-card {
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .category-selection-card .card-body {
+        padding: 1rem !important;
+    }
+    
+    .category-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .category-selection-card h4 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .category-selection-card .card-text {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .category-count .badge {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+    
+    .category-arrow {
+        margin-top: 0.5rem !important;
+        font-size: 1rem;
     }
     
     .feature-item {
-        padding: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .feature-item i {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .feature-item h5 {
+        font-size: 0.9rem;
+    }
+    
+    .feature-item p {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .min-vh-50 {
+        min-height: 25vh;
+    }
+    
+    .category-selection-card .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .category-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.4rem !important;
+    }
+    
+    .category-selection-card h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem !important;
+    }
+    
+    .category-selection-card .card-text {
+        font-size: 0.7rem;
+        margin-bottom: 0.4rem !important;
+        line-height: 1.2;
+    }
+    
+    .category-count .badge {
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+    
+    .category-arrow {
+        margin-top: 0.4rem !important;
+        font-size: 0.9rem;
     }
 }
 </style>
