@@ -141,7 +141,7 @@ def admin_login():
         username = request.form.get('username', '')
         password = request.form.get('password', '')
 
-        if username == "abc" and password == "123":
+        if verify_admin(username, password):
             session['admin_logged_in'] = True
             session['admin_username'] = username
             flash('Login successful!', 'success')

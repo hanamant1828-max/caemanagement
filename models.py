@@ -175,11 +175,16 @@ def initialize_sample_data():
         # Remove old admin user
         db.session.delete(existing_admin)
     
+    # Remove old test admin if exists
+    old_test_admin = AdminUser.query.filter_by(username='abc').first()
+    if old_test_admin:
+        db.session.delete(old_test_admin)
+    
     # Check if new admin user exists
-    if not AdminUser.query.filter_by(username='abc').first():
+    if not AdminUser.query.filter_by(username='FriendCars').first():
         admin = AdminUser()
-        admin.username = 'abc'
-        admin.set_password('123')
+        admin.username = 'FriendCars'
+        admin.set_password('Friends@567751')
         db.session.add(admin)
     
     # Check if sample vehicles exist
