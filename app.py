@@ -77,3 +77,11 @@ with app.app_context():
 
 # Import routes after app creation
 from routes import *
+
+# Start the background scheduler for periodic tasks
+try:
+    from scheduler import start_scheduler
+    start_scheduler()
+    logging.info("Background scheduler started successfully")
+except Exception as e:
+    logging.error(f"Failed to start scheduler: {e}")

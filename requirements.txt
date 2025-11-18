@@ -30,3 +30,4 @@ selenium
 SQLAlchemy
 Werkzeug
 WTForms
+APScheduler
