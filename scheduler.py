@@ -1,6 +1,7 @@
 import logging
 import requests
 import os
+import fcntl
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 TARGET_URL = "https://caemanagement.onrender.com/marketplace"
 
 _scheduler_started = False
+_lock_file = None
 
 def call_external_url():
     """
@@ -34,13 +36,52 @@ def call_external_url():
     except Exception as e:
         logger.error(f"Unexpected error in scheduled task: {str(e)}")
 
+def acquire_scheduler_lock():
+    """
+    Acquire an exclusive file lock to ensure only one scheduler runs across all processes.
+    Returns the lock file handle if successful, None otherwise.
+    """
+    global _lock_file
+    lock_path = '/tmp/scheduler.lock'
+    
+    try:
+        _lock_file = open(lock_path, 'w')
+        fcntl.flock(_lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _lock_file.write(str(os.getpid()))
+        _lock_file.flush()
+        logger.info(f"Successfully acquired scheduler lock (PID: {os.getpid()})")
+        return _lock_file
+    except IOError:
+        logger.info(f"Another process already holds the scheduler lock, skipping scheduler start")
+        if _lock_file:
+            _lock_file.close()
+            _lock_file = None
+        return None
+    except Exception as e:
+        logger.error(f"Error acquiring scheduler lock: {e}")
+        if _lock_file:
+            _lock_file.close()
+            _lock_file = None
+        return None
+
+def release_scheduler_lock():
+    """Release the scheduler lock file."""
+    global _lock_file
+    if _lock_file:
+        try:
+            fcntl.flock(_lock_file.fileno(), fcntl.LOCK_UN)
+            _lock_file.close()
+            _lock_file = None
+            logger.info("Released scheduler lock")
+        except Exception as e:
+            logger.error(f"Error releasing scheduler lock: {e}")
+
 def start_scheduler():
     """
     Initialize and start the background scheduler.
-    This should be called once when the application starts.
+    Uses file-based locking to ensure only one scheduler runs across all processes.
     
-    Guards against duplicate starts in multi-process environments (Gunicorn with --reload).
-    Only starts in the actual worker process, not in the reloader parent process.
+    This is safe for multi-process environments like Gunicorn with multiple workers.
     """
     global _scheduler_started
     
@@ -48,13 +89,8 @@ def start_scheduler():
         logger.info("Scheduler already started in this process, skipping duplicate start")
         return None
     
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        logger.info("Detected Flask development reloader parent process, skipping scheduler")
-        return None
-    
-    gunicorn_worker_id = os.environ.get('GUNICORN_WORKER_ID')
-    if gunicorn_worker_id and gunicorn_worker_id != '0':
-        logger.info(f"Detected Gunicorn worker {gunicorn_worker_id}, scheduler only runs in worker 0")
+    lock = acquire_scheduler_lock()
+    if not lock:
         return None
     
     try:
@@ -73,10 +109,11 @@ def start_scheduler():
         _scheduler_started = True
         logger.info("✓ Scheduler started successfully - will call external URL every 5 minutes")
         
-        atexit.register(lambda: scheduler.shutdown())
+        atexit.register(lambda: (scheduler.shutdown(), release_scheduler_lock()))
         
         return scheduler
         
     except Exception as e:
         logger.error(f"Failed to start scheduler: {e}")
+        release_scheduler_lock()
         return None
