@@ -141,9 +141,11 @@ def admin_login():
         username = request.form.get('username', '')
         password = request.form.get('password', '')
 
-        if verify_admin(username, password):
+        # Hardcoded credentials for demo
+        if username == 'FriendCars' and password == 'Friends@567751':
             session['admin_logged_in'] = True
             session['admin_username'] = username
+            session.permanent = True
             flash('Login successful!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
@@ -289,14 +291,15 @@ def admin_auth():
 
     app.logger.debug(f"Auth attempt: {username}")
 
-    if username == 'abc' and password == '123':
+    # Hardcoded credentials for demo
+    if username == 'FriendCars' and password == 'Friends@567751':
         session['admin_logged_in'] = True
         session['admin_username'] = username
         session.permanent = True
         flash('✅ Successfully logged in! Welcome to Admin Dashboard.', 'success')
         return redirect(url_for('admin_dashboard'))
     else:
-        flash('❌ Invalid username or password. Please use: abc / 123', 'error')
+        flash('❌ Invalid username or password. Please use: FriendCars / Friends@567751', 'error')
         return redirect(url_for('admin_login'))
 
 @app.route('/admin/login', methods=['GET', 'POST'])
