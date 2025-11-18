@@ -18,3 +18,15 @@ selenium
 sqlalchemy
 werkzeug
 wtforms
+email-validator
+Flask
+Flask-Migrate
+Flask-SQLAlchemy
+Flask-WTF
+gunicorn
+psycopg2-binary
+requests
+selenium
+SQLAlchemy
+Werkzeug
+WTForms

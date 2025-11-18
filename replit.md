@@ -1,136 +1,130 @@
-# Friendscars - OLX-Style Vehicle Marketplace
+# Friendscars Auto Marketplace
 
 ## Overview
+A comprehensive Flask-based auto marketplace web application for managing and browsing vehicle inventory. The platform features separate interfaces for administrators (vehicle management) and customers (vehicle browsing by category).
 
-A Flask-based automotive marketplace web application similar to OLX, designed for browsing vehicles. The platform features a modern, mobile-first design with an intuitive customer catalog for viewing vehicles and an admin-only dashboard for managing listings. Regular users can only browse and view vehicles, while administrators have exclusive access to add, edit, and manage vehicle listings with photos. Built with SQLite database persistence, the application provides comprehensive vehicle browsing with search/filter functionality and admin authentication.
+## Project Status
+Successfully migrated from Replit Agent to Replit environment on November 18, 2025.
+
+## Key Features
+
+### Customer Features
+- **Category-Based Browsing**: Customers can browse vehicles by category (Cars, Trucks, Commercial Vehicles)
+- **Vehicle Listings**: View detailed vehicle information with up to 6 images per vehicle
+- **Search Functionality**: Search across vehicle make, model, and title
+- **Detailed Vehicle Pages**: Comprehensive vehicle details including engine specs, ownership history, insurance info
+
+### Admin Features
+- **Admin Authentication**: Secure login system for administrators
+- **Vehicle Management**: Add, edit, and delete vehicle listings
+- **Image Upload**: Support for up to 6 images per vehicle
+- **Comprehensive Vehicle Data**: Manage extensive vehicle details including:
+  - Basic info (make, model, year, price, mileage)
+  - Engine & Performance (fuel type, transmission, horsepower)
+  - Ownership History (number of owners, service records, accident history)
+  - Insurance & Documentation (policy numbers, VIN, registration)
+  - Additional Features (exterior/interior color, condition rating, warranty)
+
+## Technology Stack
+- **Backend**: Flask 3.1.2
+- **Database**: SQLite (default) or PostgreSQL (via DATABASE_URL environment variable)
+- **ORM**: SQLAlchemy 2.0.44 with Flask-SQLAlchemy 3.1.1
+- **Forms**: Flask-WTF 1.2.2 with WTForms 3.2.1
+- **Server**: Gunicorn 23.0.0 (production-ready WSGI server)
+- **Frontend**: Bootstrap (via CDN), Font Awesome icons
+- **File Uploads**: Werkzeug secure file handling
+
+## Project Structure
+```
+.
+├── app.py                 # Flask application setup and configuration
+├── main.py               # Application entry point
+├── models.py             # Database models (Vehicle, AdminUser)
+├── routes.py             # Route handlers and business logic
+├── forms.py              # WTForms form definitions
+├── templates/            # Jinja2 HTML templates
+│   ├── base.html
+│   ├── category_selection.html
+│   ├── browse_vehicles.html
+│   ├── vehicle_detail.html
+│   ├── admin_login.html
+│   ├── admin.html
+│   └── ...
+├── static/               # Static assets
+│   ├── css/
+│   │   └── custom.css
+│   ├── js/
+│   │   ├── main.js
+│   │   └── enhanced-forms.js
+│   └── uploads/          # Vehicle images storage
+└── instance/
+    └── automarket.db     # SQLite database
+```
+
+## Configuration
+
+### Environment Variables
+- `SESSION_SECRET`: Flask session secret key (defaults to "replit-automarket-secret-key-2025")
+- `DATABASE_URL`: PostgreSQL connection string (optional, defaults to SQLite)
+
+### Database
+- **Default**: SQLite (`instance/automarket.db`)
+- **Production**: PostgreSQL (set `DATABASE_URL` environment variable)
+- Auto-creates tables on startup via `db.create_all()`
+
+### Upload Settings
+- Max file size: 16MB
+- Supported formats: PNG, JPG, JPEG, GIF
+- Storage location: `static/uploads/`
+- Max images per vehicle: 6
+
+## Running the Application
+
+### Development
+The application runs on Gunicorn with auto-reload enabled:
+```bash
+gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
+```
+
+### Access Points
+- Root (`/`): Redirects to marketplace
+- `/marketplace`: Customer category selection page
+- `/browse?category=<category>`: Browse vehicles by category
+- `/vehicle/<id>`: View individual vehicle details
+- Admin interface available (login required)
+
+## Database Models
+
+### Vehicle Model
+Comprehensive vehicle data model with 40+ fields including:
+- Basic information (title, category, make, model, year, price, mileage)
+- Engine & performance specs
+- Ownership and service history
+- Insurance and registration details
+- Features and condition ratings
+- Image gallery (JSON-stored filenames)
+- Status tracking (available/sold)
+
+### AdminUser Model
+- Username and hashed password authentication
+- Created timestamp tracking
+
+## Security Features
+- Password hashing with Werkzeug security
+- Secure filename handling for uploads
+- ProxyFix middleware for reverse proxy compatibility
+- CSRF protection available (currently disabled, can be enabled)
+
+## Migration Notes
+- All Python dependencies successfully installed via packager
+- Gunicorn configured for Replit environment
+- Application runs on port 5000
+- Database auto-initializes on startup
+- Sample data initialization available via `initialize_sample_data()`
 
 ## Recent Changes
-
-**OLX-Style Browse Page (October 19, 2025)**: Complete redesign of vehicle browse page with compact OLX-inspired layout. Changed from 4 cards per row to 6 cards per row (col-xl-2 grid), removed large hero section and replaced with slim search bar, reduced card padding and image heights, simplified card content to show only essential information (price, title, year, mileage). Browse page now displays significantly more vehicles without scrolling, matching OLX's dense listing style. Simplified routing to allow direct access to browse page without forced marketplace visit.
-
-**Customer/Admin Separation (October 19, 2025)**: Implemented complete separation between customer and admin interfaces for enhanced security. Removed all admin links from customer-facing pages (navigation bar now shows no admin references). Customer pages remain completely clean and professional. Admin controls only visible when logged in and on admin pages. Landing page redirects to marketplace for immediate customer browsing.
-
-**Step-by-Step Wizard Complete (August 11, 2025)**: Successfully implemented a comprehensive 6-step vehicle entry wizard with proper form validation, error handling, and notification system. Fixed all save button functionality and authentication issues for smooth vehicle creation workflow.
-
-**Admin Access Security (August 14, 2025)**: Removed admin login button from customer interface to prevent accidental access. Created admin URLs: `/secret-admin-access-2025` and `/staff` with public access to login form but protected dashboard access. Customers see clean marketplace without admin login visibility while administrators can access login form via direct URLs and authenticate to reach dashboard.
-
-**Edit Functionality Verified (August 14, 2025)**: Comprehensive testing confirms all edit functionality working perfectly. Vehicle data fetching, form population, edit submission, and data persistence all verified through automated testing. JavaScript console errors eliminated with enhanced async/await error handling. Admin authentication, session management, and complete CRUD operations fully operational.
-
-**CRUD Operations Fully Functional (August 17, 2025)**: Successfully resolved all CRUD functionality issues. Add, edit, and delete operations now work perfectly in the original wizard interface. Enhanced the system with JavaScript data management and REST API endpoints while maintaining the familiar visual layout. All vehicle management operations are fully operational with proper data persistence and form validation.
-
-**JavaScript Backend Integration (August 17, 2025)**: Enhanced the existing wizard admin interface with pure JavaScript data management while maintaining the original visual layout. Added REST API endpoints for vehicle operations, enabling future single-page functionality without changing the familiar interface. The original wizard admin remains the default, with an alternative SPA version available at `/admin/spa` for future use.
-
-**Landing Page Update (August 17, 2025)**: Changed the landing page from marketplace to admin login page. Now accessing the root URL (/) redirects directly to the admin login form. The marketplace is still accessible at `/marketplace` route for future reference. Admin logout also redirects to the login page for better user flow.
-
-**Console Error Fixes (August 17, 2025)**: Fixed JavaScript console errors in edit functionality, added missing "Very Good" option to condition rating dropdown, resolved syntax errors in HTML template, and improved error handling in vehicle data fetching. Edit functionality now works perfectly with proper form population and validation.
-
-**Database Enhancement (August 17, 2025)**: Added vehicle number and previous owner mobile number columns to enhance vehicle tracking capabilities. Updated admin dashboard table to display both new fields, with proper form validation and CRUD operations. Enhanced image upload system with clear hero image designation - first image slot serves as hero image displayed in admin table and marketplace browse views.
-
-**Migration Complete (August 21, 2025)**: Successfully migrated from Replit Agent to standard Replit environment with enhanced security featuring CSRF protection, gunicorn web server deployment, and comprehensive package installation. All Flask dependencies installed, SQLite database configured and working properly with sample vehicles loaded, application running smoothly on port 5000. Vehicle creation, admin authentication, edit functionality, and all core features fully operational. Session key configuration fixed for proper admin login functionality. Added Browse Cars button to admin panel for easy navigation to customer marketplace.
-
-**UI Optimization (August 12, 2025)**: Significantly reduced category button spacing for better mobile experience, compressed hero section layout, improved responsive design for smaller screens, and optimized overall page layout for faster loading and better space utilization.
-
-**Mobile Enhancement (August 12, 2025)**: Major mobile optimization with ultra-compact layout for small screens, reduced category button heights to 35px on mobile, removed icons from category buttons, compressed hero section padding, hidden vehicle specs on very small screens for cleaner layout, and optimized all spacing for maximum content visibility on mobile devices.
-
-**Localization Update (August 12, 2025)**: Updated application for Indian market with currency changed from USD ($) to Indian Rupee (₹), adjusted sample vehicle prices to realistic Indian market values (Honda Civic: ₹15,50,000, Ford F-150: ₹27,50,000, Toyota Camry: ₹20,80,000), updated admin credentials to "abc" with password "123", and changed all sample vehicle contact names to "Friendscars".
-
-**Credentials Update (August 13, 2025)**: Updated admin login credentials to simple format - Username: "abc", Password: "123" for easier access.
-
-## User Preferences
-
-Preferred communication style: Simple, everyday language.
-
-## System Architecture
-
-### Frontend Architecture
-- **Template Engine**: Jinja2 templating with Bootstrap 5 light theme for modern marketplace UI
-- **Design System**: OLX-inspired design with gradient hero sections, card-based listings, and floating action buttons
-- **Static Assets**: Custom CSS for marketplace styling, listing cards, favorite buttons, and mobile enhancements
-- **User Interface**: Dual interface - modern customer marketplace and single-page seller dashboard with modal-based CRUD
-- **Responsive Design**: Mobile-first design with touch-optimized controls, floating filter button, and adaptive layouts
-- **Interactive Features**: AJAX-powered CRUD operations, favorite toggles, breadcrumb navigation, smooth animations, and tabbed comprehensive vehicle detail forms
-
-### Backend Architecture
-- **Framework**: Flask web framework with modular route organization
-- **Form Handling**: Flask-WTF for form validation and file uploads with CSRF protection
-- **File Management**: Werkzeug for secure file uploads with UUID-based naming to prevent conflicts
-- **Session Management**: Flask sessions for admin authentication state
-- **Data Layer**: In-memory storage using Python dictionaries and classes (MVP approach)
-- **API Design**: RESTful AJAX endpoints for single-page CRUD operations with JSON responses
-
-### Authentication & Authorization
-- **Admin Authentication**: Simple username/password authentication with password hashing using Werkzeug
-- **Session Management**: Flask sessions to maintain admin login state
-- **Access Control**: Route-level protection for admin-only functionality
-- **Security**: CSRF protection on all forms, secure filename handling for uploads
-
-### Data Storage Solution
-- **Current Implementation**: PostgreSQL database with Flask-SQLAlchemy ORM for robust production persistence
-- **Data Persistence**: Full database persistence with proper schema and relationships
-- **Data Structure**: SQLAlchemy models with comprehensive vehicle details including:
-  - Basic info (pricing, specifications, contact info, images)
-  - Engine & Performance (fuel type, transmission, horsepower, drivetrain)
-  - Ownership & History (number of owners, previous owner contact, odometer, accident history, service records)
-  - Insurance & Documentation (insurance company, policy number, VIN, registration)
-  - Features & Condition (colors, features list, condition rating, warranty info)
-- **Admin Users**: Database-stored admin credentials with secure password hashing
-- **Database Migration**: Enhanced with comprehensive vehicle detail fields for professional dealership management
-
-### File Upload System
-- **Image Storage**: Local file system in static/uploads directory
-- **File Validation**: Restricted to image formats (PNG, JPG, JPEG, GIF)
-- **File Naming**: UUID prefix to prevent naming conflicts and enhance security
-- **Size Limits**: 16MB maximum file size per upload
-- **Multiple Images**: Support for multiple images per vehicle listing
-
-### Search & Filter Functionality
-- **Category Filtering**: Filter vehicles by type (Cars, Trucks, Commercial Vehicles)
-- **Text Search**: Search across vehicle title, make, and model fields
-- **Status Filtering**: Automatic filtering to show only available vehicles on public catalog
-- **Real-time Updates**: JavaScript-enhanced forms with auto-submit on category changes
-
-## External Dependencies
-
-### Frontend Libraries
-- **Bootstrap 5**: CSS framework with dark theme variant from Replit CDN
-- **Font Awesome 6**: Icon library for UI enhancement
-- **Bootstrap JavaScript**: For interactive components (carousels, modals, tooltips)
-
-### Python Packages
-- **Flask**: Core web framework
-- **Flask-WTF**: Form handling and validation with CSRF protection
-- **WTForms**: Form field definitions and validators
-- **Werkzeug**: WSGI utilities, security functions, and file handling
-
-### Infrastructure
-- **ProxyFix Middleware**: Handles reverse proxy headers for proper URL generation
-- **File System**: Local storage for uploaded images
-- **Environment Variables**: SESSION_SECRET for secure session management
-
-### Development Tools
-- **Logging**: Python logging module configured for debug level
-- **Debug Mode**: Flask debug mode enabled for development environment
-- **Hot Reload**: Development server with automatic reloading on code changes
-
-## Testing Infrastructure
-
-### Automated Testing Suite
-- **Comprehensive Test Coverage**: Complete automation testing for vehicle management workflow
-- **Multiple Testing Approaches**: Backend functional testing, UI automation with Selenium, and simple connectivity tests
-- **Test Scripts**: 
-  - `test_automation.py` - Full Selenium WebDriver UI testing
-  - `test_vehicle_creation.py` - Functional backend testing with form validation
-  - `run_tests.py` - Simple connectivity and route testing
-  - `test_runner.sh` - Automated test suite runner with environment setup
-- **Test Documentation**: 
-  - `manual_test_checklist.md` - Comprehensive manual testing procedures
-  - `README_TESTING.md` - Complete testing documentation and setup guide
-- **Test Reporting**: Automated JSON reports with timestamps, test results, and detailed logs
-- **Quality Assurance**: Form validation testing, data persistence verification, and UI element visibility testing
-
-### Testing Capabilities
-- **End-to-End Testing**: Complete vehicle creation workflow from form opening to data persistence
-- **Validation Testing**: Required field validation, data type checking, and business rule enforcement
-- **UI Testing**: Wizard navigation, form visibility, responsive design verification
-- **Authentication Testing**: Admin login, session management, and access control verification
-- **Performance Testing**: Response time measurement and load handling verification
+- **2025-11-18**: Migrated from Replit Agent to Replit environment
+  - Installed all required Python packages
+  - Configured Gunicorn WSGI server
+  - Verified application functionality
+  - Database and file uploads working correctly
