@@ -2,251 +2,471 @@
 
 {% block title %}{{ vehicle.title }} - Friendscars{% endblock %}
 
+{% block header_left %}
+<a href="{{ url_for('marketplace') }}" class="back-btn">
+    <i class="fas fa-arrow-left"></i>
+</a>
+<span class="header-title">Vehicle Details</span>
+{% endblock %}
+
+{% block header_right %}
+<button class="header-icon-btn" onclick="shareVehicle()">
+    <i class="fas fa-share-alt"></i>
+</button>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <!-- Back Navigation -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('marketplace') }}" class="text-decoration-none">Friendscars</a></li>
-                    <li class="breadcrumb-item"><a href="?category={{ vehicle.category }}" class="text-decoration-none">{{ vehicle.category }}</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ vehicle.title }}</li>
-                </ol>
-            </nav>
+<style>
+    .header-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-left: 8px;
+    }
+    .detail-gallery {
+        margin: -16px -16px 0 -16px;
+        position: relative;
+    }
+    .detail-gallery img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+    }
+    .detail-gallery .placeholder {
+        width: 100%;
+        height: 280px;
+        background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: #9ca3af;
+    }
+    .gallery-nav {
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+    }
+    .gallery-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.5);
+        border: none;
+        transition: all 0.3s;
+    }
+    .gallery-dot.active {
+        width: 24px;
+        border-radius: 4px;
+        background: white;
+    }
+    .detail-body {
+        background: white;
+        border-radius: 24px 24px 0 0;
+        margin-top: -24px;
+        position: relative;
+        padding: 24px 20px;
+        padding-bottom: 120px;
+    }
+    .price-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .detail-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #10b981;
+    }
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .status-available {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .status-sold {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .detail-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1f2937;
+    }
+    .detail-subtitle {
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 24px;
+    }
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    .spec-card {
+        background: #f3f4f6;
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+    }
+    .spec-card i {
+        font-size: 1.5rem;
+        color: #6366f1;
+        margin-bottom: 8px;
+    }
+    .spec-card .value {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+    .spec-card .label {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+    .section {
+        margin-bottom: 24px;
+    }
+    .section-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #1f2937;
+    }
+    .description-text {
+        color: #4b5563;
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+    .seller-card {
+        background: #f3f4f6;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .seller-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #6366f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    .seller-info {
+        flex: 1;
+    }
+    .seller-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #1f2937;
+    }
+    .seller-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    .contact-bar {
+        position: fixed;
+        bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 16px 20px;
+        display: flex;
+        gap: 12px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        z-index: 100;
+    }
+    .contact-bar .btn {
+        flex: 1;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-whatsapp {
+        background: #25d366;
+        color: white;
+    }
+    .btn-phone {
+        background: #6366f1;
+        color: white;
+    }
+    .thumbnail-strip {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        overflow-x: auto;
+        padding: 4px 16px;
+        background: white;
+    }
+    .thumbnail-strip::-webkit-scrollbar {
+        display: none;
+    }
+    .thumbnail {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        opacity: 0.6;
+        transition: all 0.2s;
+    }
+    .thumbnail.active {
+        border-color: #6366f1;
+        opacity: 1;
+    }
+    @media (min-width: 768px) {
+        .detail-gallery img, .detail-gallery .placeholder {
+            height: 400px;
+        }
+        .detail-body {
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .contact-bar {
+            max-width: 800px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+</style>
+
+<!-- Image Gallery -->
+<div class="detail-gallery">
+    {% if vehicle.images_list and vehicle.images_list|length > 0 %}
+        {% if vehicle.images_list|length > 1 %}
+        <div id="mainCarousel" class="carousel slide" data-bs-ride="false">
+            <div class="carousel-inner">
+                {% for image in vehicle.images_list %}
+                <div class="carousel-item {{ 'active' if loop.first else '' }}">
+                    <img src="{{ url_for('static', filename='uploads/' + image) }}" 
+                         alt="{{ vehicle.title }}"
+                         onerror="this.outerHTML='<div class=\'placeholder\'><i class=\'fas fa-car\'></i></div>'">
+                </div>
+                {% endfor %}
+            </div>
         </div>
-    </div>
-
-    <div class="row">
-        <!-- Image Gallery -->
-        <div class="col-lg-8">
-            {% if vehicle.images_list %}
-                <div class="card mb-4">
-                    <div class="card-body p-0">
-                        <!-- Main Image Display -->
-                        <div id="vehicleCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                {% for image in vehicle.images_list %}
-                                    <div class="carousel-item {{ 'active' if loop.first else '' }}">
-                                        <div class="position-relative">
-                                            <img src="{{ url_for('static', filename='uploads/' + image) }}" 
-                                                 class="d-block w-100 vehicle-detail-image" alt="{{ vehicle.title }}">
-                                            <button class="btn btn-success position-absolute" 
-                                                    style="top: 10px; right: 10px; opacity: 0.8;"
-                                                    onclick="downloadSingleImage('{{ image }}', '{{ vehicle.title }}', {{ loop.index }})">
-                                                <i class="fas fa-download me-1"></i>Download
-                                            </button>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            
-                            {% if vehicle.images_list|length > 1 %}
-                                <button class="carousel-control-prev" type="button" data-bs-target="#vehicleCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon"></span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#vehicleCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon"></span>
-                                </button>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Thumbnail Navigation -->
-                        {% if vehicle.images_list|length > 1 %}
-                            <div class="p-3">
-                                <div class="row g-2">
-                                    {% for image in vehicle.images_list %}
-                                        <div class="col-3">
-                                            <img src="{{ url_for('static', filename='uploads/' + image) }}" 
-                                                 class="img-thumbnail w-100 thumbnail-nav" 
-                                                 data-bs-target="#vehicleCarousel" 
-                                                 data-bs-slide-to="{{ loop.index0 }}"
-                                                 style="cursor: pointer; height: 80px; object-fit: cover;"
-                                                 alt="{{ vehicle.title }}">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            {% else %}
-                <div class="card mb-4">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-car fa-5x text-muted mb-3"></i>
-                        <h5 class="text-muted">No images available</h5>
-                    </div>
-                </div>
-            {% endif %}
+        <div class="gallery-nav">
+            {% for image in vehicle.images_list %}
+            <button class="gallery-dot {{ 'active' if loop.first else '' }}" 
+                    data-bs-target="#mainCarousel" 
+                    data-bs-slide-to="{{ loop.index0 }}"></button>
+            {% endfor %}
         </div>
-
-        <!-- Vehicle Information -->
-        <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4 class="mb-0">{{ vehicle.title }}</h4>
-                    <span class="badge bg-secondary">{{ vehicle.category }}</span>
-                    {% if vehicle.status == 'sold' %}
-                        <span class="badge bg-danger ms-2">SOLD</span>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <!-- Price Display -->
-                    <div class="text-center mb-4">
-                        <h2 class="text-success mb-0">₹{{ "{:,.0f}".format(vehicle.price) }}</h2>
-                        <small class="text-muted">Asking Price</small>
-                    </div>
-                    
-                    <!-- Vehicle Specifications -->
-                    <h6 class="text-primary mb-3">Specifications</h6>
-                    <div class="row g-3 mb-4">
-                        <div class="col-6">
-                            <div class="text-center p-2 bg-dark rounded">
-                                <div class="text-muted small">Make</div>
-                                <strong>{{ vehicle.make }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center p-2 bg-dark rounded">
-                                <div class="text-muted small">Model</div>
-                                <strong>{{ vehicle.model }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center p-2 bg-dark rounded">
-                                <div class="text-muted small">Year</div>
-                                <strong>{{ vehicle.year }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center p-2 bg-dark rounded">
-                                <div class="text-muted small">Mileage</div>
-                                <strong>{{ "{:,}".format(vehicle.mileage) }} mi</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Information -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-phone me-2"></i>Contact Information</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>{{ vehicle.contact_name }}</strong>
-                    </div>
-                    <div class="mb-3">
-                        <a href="tel:{{ vehicle.contact_phone }}" class="btn btn-primary w-100">
-                            <i class="fas fa-phone me-2"></i>Call {{ vehicle.contact_phone }}
-                        </a>
-                    </div>
-                    <div class="text-center">
-                        <small class="text-muted">
-                            <i class="fas fa-clock me-1"></i>
-                            Listed {{ vehicle.created_at.strftime('%Y-%m-%d') }}
-                        </small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Share Button -->
-            <div class="card">
-                <div class="card-body text-center">
-                    <button class="btn btn-outline-primary w-100 mb-2" onclick="shareVehicle()">
-                        <i class="fas fa-share me-2"></i>Share This Vehicle
-                    </button>
-                    {% if vehicle.images_list and vehicle.images_list|length > 0 %}
-                    <button class="btn btn-success w-100" onclick="downloadAllImages()">
-                        <i class="fas fa-download me-2"></i>Download All Images ({{ vehicle.images_list|length }})
-                    </button>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Vehicle Description -->
-    {% if vehicle.description %}
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Description</h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-0">{{ vehicle.description }}</p>
-                    </div>
-                </div>
-            </div>
+        {% else %}
+        <img src="{{ url_for('static', filename='uploads/' + vehicle.images_list[0]) }}" 
+             alt="{{ vehicle.title }}"
+             onerror="this.outerHTML='<div class=\'placeholder\'><i class=\'fas fa-car\'></i></div>'">
+        {% endif %}
+    {% else %}
+        <div class="placeholder">
+            <i class="fas fa-car"></i>
         </div>
     {% endif %}
 </div>
 
+<!-- Thumbnail Strip -->
+{% if vehicle.images_list and vehicle.images_list|length > 1 %}
+<div class="thumbnail-strip">
+    {% for image in vehicle.images_list %}
+    <img src="{{ url_for('static', filename='uploads/' + image) }}" 
+         class="thumbnail {{ 'active' if loop.first else '' }}"
+         onclick="goToSlide({{ loop.index0 }})"
+         onerror="this.style.display='none'">
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Detail Body -->
+<div class="detail-body">
+    <div class="price-section">
+        <div class="detail-price">₹{{ "{:,.0f}".format(vehicle.price) }}</div>
+        <span class="status-badge {{ 'status-sold' if vehicle.status == 'sold' else 'status-available' }}">
+            {{ vehicle.status|upper if vehicle.status else 'AVAILABLE' }}
+        </span>
+    </div>
+    
+    <h1 class="detail-title">{{ vehicle.title }}</h1>
+    <p class="detail-subtitle">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</p>
+    
+    <!-- Specs Grid -->
+    <div class="specs-grid">
+        <div class="spec-card">
+            <i class="fas fa-tachometer-alt"></i>
+            <div class="value">{{ "{:,}".format(vehicle.mileage) }}</div>
+            <div class="label">Kilometers</div>
+        </div>
+        <div class="spec-card">
+            <i class="fas fa-calendar"></i>
+            <div class="value">{{ vehicle.year }}</div>
+            <div class="label">Year</div>
+        </div>
+        <div class="spec-card">
+            <i class="fas fa-car"></i>
+            <div class="value">{{ vehicle.make }}</div>
+            <div class="label">Make</div>
+        </div>
+        <div class="spec-card">
+            <i class="fas fa-tag"></i>
+            <div class="value">{{ vehicle.category }}</div>
+            <div class="label">Category</div>
+        </div>
+    </div>
+    
+    <!-- Description -->
+    {% if vehicle.description %}
+    <div class="section">
+        <h3 class="section-header">Description</h3>
+        <p class="description-text">{{ vehicle.description }}</p>
+    </div>
+    {% endif %}
+    
+    <!-- Seller Info -->
+    <div class="section">
+        <h3 class="section-header">Seller</h3>
+        <div class="seller-card">
+            <div class="seller-avatar">
+                {{ vehicle.contact_name[0]|upper if vehicle.contact_name else 'S' }}
+            </div>
+            <div class="seller-info">
+                <div class="seller-name">{{ vehicle.contact_name or 'Seller' }}</div>
+                <div class="seller-label">Vehicle Seller</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Download Images -->
+    {% if vehicle.images_list and vehicle.images_list|length > 0 %}
+    <div class="section">
+        <button onclick="downloadAllImages()" style="width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #6366f1; background: white; color: #6366f1; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+            <i class="fas fa-download"></i>
+            Download All Images ({{ vehicle.images_list|length }})
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Fixed Contact Bar -->
+<div class="contact-bar">
+    <a href="https://wa.me/{{ vehicle.contact_phone|replace('+', '')|replace(' ', '')|replace('-', '') }}?text=Hi, I'm interested in {{ vehicle.title }}" 
+       class="btn btn-whatsapp" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        WhatsApp
+    </a>
+    <a href="tel:{{ vehicle.contact_phone }}" class="btn btn-phone">
+        <i class="fas fa-phone"></i>
+        Call Now
+    </a>
+</div>
+
 <script>
-function shareVehicle() {
-    if (navigator.share) {
-        navigator.share({
-            title: '{{ vehicle.title }}',
-            text: '{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} - ₹{{ "{:,.0f}".format(vehicle.price) }}',
-            url: window.location.href
+// Carousel thumbnail sync
+const mainCarousel = document.getElementById('mainCarousel');
+const thumbnails = document.querySelectorAll('.thumbnail');
+const dots = document.querySelectorAll('.gallery-dot');
+
+if (mainCarousel) {
+    mainCarousel.addEventListener('slid.bs.carousel', function(e) {
+        thumbnails.forEach((t, i) => {
+            t.classList.toggle('active', i === e.to);
         });
+        dots.forEach((d, i) => {
+            d.classList.toggle('active', i === e.to);
+        });
+    });
+    
+    // Swipe support
+    let touchStartX = 0;
+    mainCarousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    mainCarousel.addEventListener('touchend', (e) => {
+        const diff = touchStartX - e.changedTouches[0].screenX;
+        if (Math.abs(diff) > 50) {
+            const bsCarousel = bootstrap.Carousel.getOrCreateInstance(mainCarousel);
+            if (diff > 0) bsCarousel.next();
+            else bsCarousel.prev();
+        }
+    }, { passive: true });
+}
+
+function goToSlide(index) {
+    const carousel = bootstrap.Carousel.getOrCreateInstance(mainCarousel);
+    carousel.to(index);
+}
+
+function shareVehicle() {
+    const title = '{{ vehicle.title }}';
+    const url = window.location.href;
+    
+    if (navigator.share) {
+        navigator.share({ 
+            title: title,
+            text: '{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} - ₹{{ "{:,.0f}".format(vehicle.price) }}',
+            url: url 
+        }).catch(() => {});
     } else {
-        // Fallback: copy URL to clipboard
-        navigator.clipboard.writeText(window.location.href).then(function() {
-            alert('Link copied to clipboard!');
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copied!');
         });
     }
 }
 
-function downloadSingleImage(imageName, vehicleTitle, imageIndex) {
-    const link = document.createElement('a');
-    link.href = '/static/uploads/' + imageName;
-    link.download = vehicleTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_image_' + imageIndex + '_' + imageName;
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showNotification('Image ' + imageIndex + ' downloaded successfully!', 'success');
-}
-
 function downloadAllImages() {
-    const vehicleImages = {{ vehicle.images_list|tojson }};
+    const vehicleImages = {{ vehicle.images_list|tojson if vehicle.images_list else '[]' }};
     const vehicleTitle = '{{ vehicle.title }}';
     
     vehicleImages.forEach((imageName, index) => {
         setTimeout(() => {
             const link = document.createElement('a');
             link.href = '/static/uploads/' + imageName;
-            link.download = vehicleTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_image_' + (index + 1) + '_' + imageName;
-            
+            link.download = vehicleTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + (index + 1) + '.jpg';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }, index * 500); // Delay each download by 500ms
+        }, index * 500);
     });
     
-    showNotification('Downloading all ' + vehicleImages.length + ' images...', 'info');
+    showToast('Downloading ' + vehicleImages.length + ' images...');
 }
 
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    notification.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+function showToast(message) {
+    const existing = document.querySelector('.app-toast');
+    if (existing) existing.remove();
     
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 3000);
+    const toast = document.createElement('div');
+    toast.className = 'app-toast';
+    toast.textContent = message;
+    toast.style.cssText = 'position: fixed; bottom: 160px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 14px 28px; border-radius: 30px; font-size: 0.9rem; font-weight: 500; z-index: 9999;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 </script>
 {% endblock %}
